@@ -14,6 +14,9 @@ class Refbook(models.Model):
         verbose_name = "Справочник"
         verbose_name_plural = "Справочники"
 
+    def __str__(self):
+        return f"'{self.code}' Код: {self.name}"
+
 
 class RefbookVersion(models.Model):
     """
@@ -28,6 +31,9 @@ class RefbookVersion(models.Model):
         verbose_name = "Версия справочника"
         verbose_name_plural = "Версии справочников"
         unique_together = (('refbook_id', 'version'), ('refbook_id', 'date'))
+
+    def __str__(self):
+        return f"{self.version}"
 
 
 class RefbookElement(models.Model):
