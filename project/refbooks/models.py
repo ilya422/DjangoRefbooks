@@ -15,7 +15,7 @@ class Refbook(models.Model):
         verbose_name_plural = "Справочники"
 
     def __str__(self):
-        return f"'{self.code}' Код: {self.name}"
+        return f'Код: {self.code}. "{self.name}"'
 
 
 class RefbookVersion(models.Model):
