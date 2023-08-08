@@ -12,6 +12,7 @@ class RefbookAdmin(admin.ModelAdmin):
 
     class VersionInline(admin.TabularInline):
         model = RefbookVersion
+        exclude = ('id',)
 
     inlines = (VersionInline,)
 
@@ -39,6 +40,7 @@ class RefbookVersionAdmin(admin.ModelAdmin):
 
     class RefbookElementInline(admin.TabularInline):
         model = RefbookElement
+        exclude = ('id',)
 
     inlines = (RefbookElementInline,)
 
