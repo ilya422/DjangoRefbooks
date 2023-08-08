@@ -30,7 +30,7 @@ class RefbooksAPIView(APIView):
         _filter = {}
         if request.GET.get('date', None):
             versions = RefbookVersion.objects.filter(date__gte=request.GET['date']).all()
-            _filter['id__in'] = [v.id for v in versions]
+            _filter['id__in'] = [v.refbook.id for v in versions]
 
         # Получение записей
         refbooks = Refbook.objects.filter(**_filter).all()
