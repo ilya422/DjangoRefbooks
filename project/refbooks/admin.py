@@ -27,6 +27,7 @@ class RefbookAdmin(admin.ModelAdmin):
 
     current_version_date.short_description = 'Дата начала действия версии'
 
+    readonly_fields = ('id',)
     list_display = ('id', 'code', 'name', 'current_version', 'current_version_date')
 
 
@@ -53,6 +54,7 @@ class RefbookVersionAdmin(admin.ModelAdmin):
 
     refbook_name.short_description = 'Наименование справочника'
 
+    readonly_fields = ('id',)
     list_display = ('refbook_code', 'refbook_name', 'version', 'date')
 
 
@@ -61,4 +63,4 @@ class RefbookElementAdmin(admin.ModelAdmin):
     """
     Панель элементов справочника
     """
-    pass
+    readonly_fields = ('id',)
