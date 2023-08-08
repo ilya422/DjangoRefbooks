@@ -2,6 +2,9 @@ from django.db import models
 
 
 class Refbook(models.Model):
+    """
+    Модель справочника
+    """
     id = models.AutoField(primary_key=True, verbose_name="Идентификатор")
     code = models.CharField(max_length=100, unique=True, verbose_name="Код")
     name = models.CharField(max_length=300, verbose_name="Наименование")
@@ -13,6 +16,9 @@ class Refbook(models.Model):
 
 
 class RefbookVersion(models.Model):
+    """
+    Модель версии справочника
+    """
     id = models.AutoField(primary_key=True, verbose_name="Идентификатор")
     refbook = models.ForeignKey(Refbook, on_delete=models.CASCADE, verbose_name="Справочник")
     version = models.CharField(max_length=50, verbose_name="Версия")
@@ -25,6 +31,9 @@ class RefbookVersion(models.Model):
 
 
 class RefbookElement(models.Model):
+    """
+    Модель элемента справочника
+    """
     id = models.AutoField(primary_key=True, verbose_name="Идентификатор")
     version = models.ForeignKey(RefbookVersion, on_delete=models.CASCADE, verbose_name="Версия")
     code = models.CharField(max_length=100, verbose_name="Код элемента")
