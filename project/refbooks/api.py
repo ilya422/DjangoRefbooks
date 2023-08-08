@@ -62,7 +62,7 @@ def get_refbook_elements(request, refbook_id):
     # Заполнение фильтра
     _filter = {}
     if request.GET.get('version', None):
-        version = RefbookVersion.objects.filter(refbook_id=refbook_id, version=request.GET['version']).latest()
+        version = RefbookVersion.objects.filter(refbook_id=refbook_id, version=request.GET['version']).last()
     else:
         version = RefbookVersion.objects.filter(refbook_id=refbook_id, date__lte=date.today()).latest('date')
     _filter['version'] = version.id
