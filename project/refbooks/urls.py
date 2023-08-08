@@ -1,8 +1,10 @@
 from django.urls import path
-from .api import *
+
+from . import views
+
 
 urlpatterns = [
-    path('', refbooks_farm),
-    path('<int:id>/elements', refbook_elements_farm),
-    path('<int:id>/check_element', check_refbook_element)
+    path('', views.RefbooksAPIView.as_view()),
+    path('<int:id>/elements', views.RefbookElementsAPIView.as_view()),
+    path('<int:id>/check_element', views.RefbookElementValidator.as_view())
 ]
