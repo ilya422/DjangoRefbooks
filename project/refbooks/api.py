@@ -1,5 +1,5 @@
 from datetime import date
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 
 from .models import Refbook, RefbookVersion, RefbookElement
 from .serializers import RefbookSerializer, RefbookElementSerializer
@@ -77,3 +77,38 @@ def get_refbook_elements(request, refbook_id):
         del serialized['version']
 
     return JsonResponse(status=200, data=refbook_elements_serialized, safe=False)
+
+
+def check_refbook_element(request, id):
+    """
+    Функция для валидация элемента справочника
+    :param request: Объект запроса
+    :param id: ID справочника
+    :return: HTTP
+    """
+    version = None
+
+    # Проверка обязательных параметров query
+    code = request.GET.get('code', None)    # Код элемента справочника
+    value = request.GET.get('value', None)  # Значение элемента справочника
+    if not all((code, value)):
+        return HttpResponse(status=422, content="Отсутствуют обязательные параметры: code, value")
+
+    # Заполнение фильтра
+    _filter = {
+        'code': code,
+        'value': value
+    }
+    if request.GET.get('version', None):
+        version = RefbookVersion.objects.filter(refbook_id=id, version=request.GET['version']).last()
+    else:
+        version = RefbookVersion.objects.filter(refbook_id=id, date__lte=date.today()).latest('date')
+    _filter['version'] = version.id
+
+    # Получение записей
+    refbook_elements = RefbookElement.objects.filter(**_filter).all()
+
+    if refbook_elements:
+        return HttpResponse(status=200, content="OK")
+
+    return HttpResponse(status=404, content="NOT FOUND")
