@@ -36,7 +36,11 @@ class RefbooksAPIView(APIView):
         refbooks = Refbook.objects.filter(**_filter).all()
         refbooks_serialized = RefbookAPISerializer(refbooks, many=True).data
 
-        return JsonResponse(status=HTTP_200_OK, data=refbooks_serialized, safe=False)
+        # Формирование ответа
+        data = {
+            "refbooks": refbooks_serialized
+        }
+        return JsonResponse(status=HTTP_200_OK, data=data, safe=False)
 
 
 class RefbookElementsAPIView(APIView):
@@ -70,7 +74,12 @@ class RefbookElementsAPIView(APIView):
         refbook_elements = RefbookElement.objects.filter(**_filter).all()
         refbook_elements_serialized = RefbookElementAPISerializer(refbook_elements, many=True).data
 
-        return JsonResponse(status=HTTP_200_OK, data=refbook_elements_serialized, safe=False)
+
+        # Формирование ответа
+        data = {
+            "elements": refbook_elements_serialized
+        }
+        return JsonResponse(status=HTTP_200_OK, data=data, safe=False)
 
 
 class RefbookElementValidator(APIView):
