@@ -1,9 +1,9 @@
 from datetime import date
-from http.client import NOT_FOUND, OK
 
 from django.http import JsonResponse, HttpResponse
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
+from rest_framework.status import HTTP_200_OK, HTTP_204_NO_CONTENT
 from rest_framework.views import APIView
 
 from .models import Refbook, RefbookVersion, RefbookElement
@@ -36,7 +36,7 @@ class RefbooksAPIView(APIView):
         refbooks = Refbook.objects.filter(**_filter).all()
         refbooks_serialized = RefbookAPISerializer(refbooks, many=True).data
 
-        return JsonResponse(status=OK, data=refbooks_serialized, safe=False)
+        return JsonResponse(status=HTTP_200_OK, data=refbooks_serialized, safe=False)
 
 
 class RefbookElementsAPIView(APIView):
@@ -70,7 +70,7 @@ class RefbookElementsAPIView(APIView):
         refbook_elements = RefbookElement.objects.filter(**_filter).all()
         refbook_elements_serialized = RefbookElementAPISerializer(refbook_elements, many=True).data
 
-        return JsonResponse(status=OK, data=refbook_elements_serialized, safe=False)
+        return JsonResponse(status=HTTP_200_OK, data=refbook_elements_serialized, safe=False)
 
 
 class RefbookElementValidator(APIView):
@@ -110,7 +110,7 @@ class RefbookElementValidator(APIView):
         # Получение записей
         refbook_elements = RefbookElement.objects.filter(**_filter).all()
 
-        if refbook_elements:
-            return HttpResponse(status=OK, content="Элемент найден")
+        if not refbook_elements:
+            return HttpResponse(status=HTTP_204_NO_CONTENT, content="Элемент не найден")
 
-        return HttpResponse(status=NOT_FOUND, content="Элемент не найден")
+        return HttpResponse(status=HTTP_200_OK, content="Элемент найден")
