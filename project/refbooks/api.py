@@ -71,4 +71,9 @@ def get_refbook_elements(request, refbook_id):
     refbook_elements = RefbookElement.objects.filter(**_filter).all()
     refbook_elements_serialized = RefbookElementSerializer(refbook_elements, many=True).data
 
+    # Очистка полей
+    for serialized in refbook_elements_serialized:
+        del serialized['id']
+        del serialized['version']
+
     return JsonResponse(status=200, data=refbook_elements_serialized, safe=False)
