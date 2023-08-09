@@ -10,6 +10,7 @@ class RefbooksAPITest(APITestCase):
         Refbook.objects.create(code="MS1", name=" ", description="")
         Refbook.objects.create(code="ICD-10", name=" -10", description="")
         Refbook.objects.create(code="ICD-12", name=" -12", description="")
+
         RefbookVersion.objects.create(refbook_id='1', version='1.0', date="2023-09-08")
         RefbookVersion.objects.create(refbook_id='2', version='1.0', date="2023-01-07")
         RefbookVersion.objects.create(refbook_id='2', version='1.1', date="2023-05-08")
@@ -120,3 +121,48 @@ class RefbookElementsAPITest(APITestCase):
     def test_refbook_elements_not_exist(self):
         resp = self.client.get(reverse('refbook_elements', kwargs={"id": '99'}))
         self.assertEquals(resp.status_code, HTTP_204_NO_CONTENT)
+
+
+class RefbookElementValidatorAPITest(APITestCase):
+    def setUp(self):
+        Refbook.objects.create(code="MS1", name=" ", description="")
+
+        RefbookVersion.objects.create(refbook_id='1', version='0.1', date="2022-08-09")
+        RefbookVersion.objects.create(refbook_id='1', version='1.0', date="2023-08-09")
+        RefbookVersion.objects.create(refbook_id='1', version='2.0', date="2025-08-09")
+
+        RefbookElement.objects.create(version_id='1', code='c1-1', value='123-1')
+        RefbookElement.objects.create(version_id='2', code='c1-2', value='123-2')
+        RefbookElement.objects.create(version_id='3', code='c1-3', value='123-3')
+
+    def test_exist(self):
+        resp = self.client.get(reverse('check_element', kwargs={"id": '1'}),
+                               data={'code': 'c1-2', 'value': '123-2'})
+        self.assertEquals(resp.status_code, HTTP_200_OK)
+
+        resp = self.client.get(reverse('check_element', kwargs={"id": '1'}),
+                               data={'code': 'c1-2', 'value': '123-2', 'version': '1.0'})
+        self.assertEquals(resp.status_code, HTTP_200_OK)
+
+
+    def test_not_exist(self):
+        resp = self.client.get(reverse('check_element', kwargs={"id": '1'}),
+                               data={'code': 'zzzzz', 'value': 'zzzzz'})
+        self.assertEquals(resp.status_code, HTTP_204_NO_CONTENT)
+
+        resp = self.client.get(reverse('check_element', kwargs={"id": '1'}),
+                               data={'code': 'zzzzz', 'value': 'zzzzz', 'version': '99'})
+        self.assertEquals(resp.status_code, HTTP_204_NO_CONTENT)
+
+        resp = self.client.get(reverse('check_element', kwargs={"id": '99'}),
+                               data={'code': 'c1-2', 'value': '123-2'})
+        self.assertEquals(resp.status_code, HTTP_204_NO_CONTENT)
+
+        resp = self.client.get(reverse('check_element', kwargs={"id": '1'}),
+                               data={'code': 'zzz', 'value': '123-2'})
+        self.assertEquals(resp.status_code, HTTP_204_NO_CONTENT)
+
+        resp = self.client.get(reverse('check_element', kwargs={"id": '1'}),
+                               data={'code': 'c1-2', 'value': 'zzz'})
+        self.assertEquals(resp.status_code, HTTP_204_NO_CONTENT)
+
