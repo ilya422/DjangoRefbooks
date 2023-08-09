@@ -26,20 +26,26 @@ class RefbooksAPIView(APIView):
         Получение списка справочников
         :return: (JsonResponse) - список справочников
         """
+        data = {
+            "refbooks": []
+        }
+
         # Заполнение фильтра
         _filter = {}
         if request.GET.get('date', None):
-            versions = RefbookVersion.objects.filter(date__gte=request.GET['date']).all()
+            versions = RefbookVersion.objects.filter(date__lte=request.GET['date']).all()
+            if not versions:
+                return JsonResponse(status=HTTP_204_NO_CONTENT, data=data, safe=False)
             _filter['id__in'] = [v.refbook.id for v in versions]
 
         # Получение записей
         refbooks = Refbook.objects.filter(**_filter).all()
+        if not refbooks:
+            return JsonResponse(status=HTTP_204_NO_CONTENT, data=data, safe=False)
         refbooks_serialized = RefbookAPISerializer(refbooks, many=True).data
 
         # Формирование ответа
-        data = {
-            "refbooks": refbooks_serialized
-        }
+        data["refbooks"] = refbooks_serialized
         return JsonResponse(status=HTTP_200_OK, data=data, safe=False)
 
 
@@ -62,23 +68,33 @@ class RefbookElementsAPIView(APIView):
         :param id: (str) - Идентификатор справочника
         :return: (JsonResponse) - список элеметов справочника
         """
+        data = {
+            "elements": []
+        }
+
         # Заполнение фильтра
         _filter = {}
         if request.GET.get('version', None):
-            version = RefbookVersion.objects.filter(refbook_id=id, version=request.GET['version']).last()
+            try:
+                version = RefbookVersion.objects.filter(refbook_id=id, version=request.GET['version']).last()
+            except RefbookVersion.DoesNotExist:
+                return JsonResponse(status=HTTP_204_NO_CONTENT, data=data, safe=False)
         else:
-            version = RefbookVersion.objects.filter(refbook_id=id, date__lte=date.today()).latest('date')
+            try:
+                version = RefbookVersion.objects.filter(refbook_id=id, date__lte=date.today()).latest('date')
+            except RefbookVersion.DoesNotExist:
+                return JsonResponse(status=HTTP_204_NO_CONTENT, data=data, safe=False)
         _filter['version'] = version.id if version else None
 
         # Получение записей
         refbook_elements = RefbookElement.objects.filter(**_filter).all()
+        if not refbook_elements:
+            return JsonResponse(status=HTTP_204_NO_CONTENT, data=data, safe=False)
         refbook_elements_serialized = RefbookElementAPISerializer(refbook_elements, many=True).data
 
 
         # Формирование ответа
-        data = {
-            "elements": refbook_elements_serialized
-        }
+        data["elements"] = refbook_elements_serialized
         return JsonResponse(status=HTTP_200_OK, data=data, safe=False)
 
 
@@ -111,14 +127,19 @@ class RefbookElementValidator(APIView):
             'value': request.GET['value']
         }
         if request.GET.get('version', None):
-            version = RefbookVersion.objects.filter(refbook_id=id, version=request.GET['version']).last()
+            try:
+                version = RefbookVersion.objects.filter(refbook_id=id, version=request.GET['version']).last()
+            except RefbookVersion.DoesNotExist:
+                return HttpResponse(status=HTTP_204_NO_CONTENT, content="Элемент не найден")
         else:
-            version = RefbookVersion.objects.filter(refbook_id=id, date__lte=date.today()).latest('date')
+            try:
+                version = RefbookVersion.objects.filter(refbook_id=id, date__lte=date.today()).latest('date')
+            except RefbookVersion.DoesNotExist:
+                return HttpResponse(status=HTTP_204_NO_CONTENT, content="Элемент не найден")
         _filter['version'] = version.id if version else None
 
         # Получение записей
         refbook_elements = RefbookElement.objects.filter(**_filter).all()
-
         if not refbook_elements:
             return HttpResponse(status=HTTP_204_NO_CONTENT, content="Элемент не найден")
 

@@ -1,5 +1,5 @@
 from rest_framework.reverse import reverse
-from rest_framework.status import HTTP_200_OK
+from rest_framework.status import HTTP_200_OK, HTTP_204_NO_CONTENT
 from rest_framework.test import APITestCase
 
 from .models import Refbook, RefbookVersion, RefbookElement
@@ -13,7 +13,7 @@ class RefbooksAPITest(APITestCase):
         RefbookVersion.objects.create(refbook_id='1', version='1.0', date="2023-09-08")
         RefbookVersion.objects.create(refbook_id='2', version='1.0', date="2023-01-07")
         RefbookVersion.objects.create(refbook_id='2', version='1.1', date="2023-05-08")
-        RefbookVersion.objects.create(refbook_id='3', version='0.1', date="2023-01-01")
+        RefbookVersion.objects.create(refbook_id='3', version='0.1', date="2026-01-01")
 
     def test_refbooks(self):
         resp = self.client.get(reverse('refbooks'))
@@ -44,7 +44,7 @@ class RefbooksAPITest(APITestCase):
         )
 
     def test_refbooks_with_date(self):
-        resp = self.client.get(reverse('refbooks'), data={"date": "2023-05-08"})
+        resp = self.client.get(reverse('refbooks'), data={"date": "2023-09-08"})
         self.assertEquals(resp.status_code, HTTP_200_OK)
         content = resp.json()
         print(content)
@@ -65,6 +65,11 @@ class RefbooksAPITest(APITestCase):
                 ]
             } == content
         )
+
+    def test_refbook_not_exist_with_date(self):
+        resp = self.client.get(reverse('refbooks'), data={"date": "2010-05-08"})
+        self.assertEquals(resp.status_code, HTTP_204_NO_CONTENT)
+
 
 
 class RefbookElementsAPITest(APITestCase):
@@ -99,7 +104,7 @@ class RefbookElementsAPITest(APITestCase):
         )
 
     def test_refbook_elements_with_version(self):
-        resp = self.client.get(reverse('refbook_elements', kwargs={"id": 2}), data={'version': 1.0})
+        resp = self.client.get(reverse('refbook_elements', kwargs={"id": '2'}), data={'version': '1.0'})
         self.assertEquals(resp.status_code, HTTP_200_OK)
         content = resp.json()
         print(content)
@@ -111,3 +116,7 @@ class RefbookElementsAPITest(APITestCase):
                 ]
             } == content
         )
+
+    def test_refbook_elements_not_exist(self):
+        resp = self.client.get(reverse('refbook_elements', kwargs={"id": '99'}))
+        self.assertEquals(resp.status_code, HTTP_204_NO_CONTENT)
